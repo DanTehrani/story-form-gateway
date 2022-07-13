@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "declaration": false,
+    "noLib": false,
+    "sourceMap": true,
+    "pretty": true,
+    "listFiles": false,
+    "noEmitHelpers": false,
+    "outDir": "build/",
+    "baseUrl": "src/"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"],
+  "compileOnSave": false
+}
