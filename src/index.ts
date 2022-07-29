@@ -1,9 +1,10 @@
 import "dotenv/config";
-import * as express from "express";
+import express, { Request } from "express";
 import arweave, { getWalletKey } from "./lib/arweave";
 import * as bookmark from "./lib/bookmark";
+import * as form from "./lib/form";
 import axios from "axios";
-import * as cors from "cors";
+import cors from "cors";
 
 const { PORT } = process.env;
 
@@ -42,6 +43,25 @@ app.get("/admin-account", async (req, res) => {
   const address = await arweave.wallets.jwkToAddress(key);
 
   res.send(address);
+});
+
+type CreateFormRequestBody = {
+  body: {
+    signature: string;
+  };
+};
+
+type CreateFormRequest = {
+  body: CreateFormRequestBody;
+} & Request;
+
+app.post("/forms", async (req: CreateFormRequest, res, next) => {
+  try {
+    const txId = await form.uploadForm(req.body);
+    res.send(txId);
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.listen(port, () => {
