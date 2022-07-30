@@ -2,7 +2,7 @@ import arweave, { getWalletKey } from "./arweave";
 import sha256 from "crypto-js/sha256";
 import config from "../config";
 const { APP_ID, APP_VERSION } = config;
-import { EIP721TypedMessage, FormInput, Answer } from "types";
+import { EIP721TypedMessage, FormInput, Answer, FormSubmission } from "types";
 
 import {
   MessageTypes,
@@ -69,15 +69,18 @@ export const uploadForm = async (formInput: FormInput): Promise<string> => {
 };
 
 export const uploadAnswer = async (
-  formId: string,
-  submission: Answer[]
+  formSubmission: FormSubmission
 ): Promise<string> => {
+  // TODO: Verify the proof here
+
   const key = await getWalletKey();
+
   const transaction = await arweave.createTransaction(
     {
       data: JSON.stringify(
         {
-          submission
+          answers: formSubmission.answers,
+          proof: formSubmission.proof
         },
         null,
         0
@@ -89,19 +92,13 @@ export const uploadAnswer = async (
   transaction.addTag("App-Id", APP_ID);
   transaction.addTag("App-Version", APP_VERSION);
   transaction.addTag("Type", "submission");
-  transaction.addTag("Form-Id", formId);
-  transaction.addTag("Signature", "");
+  transaction.addTag("Form-Id", formSubmission.formId);
+  transaction.addTag("Submission-Id", formSubmission.submissionId);
   transaction.addTag("Version", "1");
 
-  /**
-   * Verify.
-   * Verify that the answer sig is the signature of the whitelisted address.
-   * Manage the whitelist secretly.
-   * Or, just go with zk snark now.
-   */
-
   await arweave.transactions.sign(transaction, key);
-  //  await arweave.transactions.post(transaction);
+  await arweave.transactions.post(transaction);
+
   console.log(transaction.id);
 
   return transaction.id;

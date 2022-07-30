@@ -1,10 +1,11 @@
 import "dotenv/config";
-import express, { Request } from "express";
+import express from "express";
 import arweave, { getWalletKey } from "./lib/arweave";
 import * as bookmark from "./lib/bookmark";
 import * as form from "./lib/form";
 import axios from "axios";
 import cors from "cors";
+import { CreateFormRequest } from "./types";
 
 const { PORT } = process.env;
 
@@ -45,19 +46,18 @@ app.get("/admin-account", async (req, res) => {
   res.send(address);
 });
 
-type CreateFormRequestBody = {
-  body: {
-    signature: string;
-  };
-};
-
-type CreateFormRequest = {
-  body: CreateFormRequestBody;
-} & Request;
-
 app.post("/forms", async (req: CreateFormRequest, res, next) => {
   try {
     const txId = await form.uploadForm(req.body);
+    res.send(txId);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post("/answers", async (req: CreateFormRequest, res, next) => {
+  try {
+    const txId = await form.uploadAnswer(req.body);
     res.send(txId);
   } catch (err) {
     next(err);

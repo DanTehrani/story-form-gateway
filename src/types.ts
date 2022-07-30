@@ -1,4 +1,6 @@
-export type Answer = string;
+import { Request } from "express";
+
+// Form
 
 export type FormCustomAttribute = {
   key: string;
@@ -40,4 +42,29 @@ export type EIP721TypedMessage = {
 export type FormInput = {
   signature: string;
   eip721TypedMessage: EIP721TypedMessage;
+};
+
+// Submission/Answer
+
+export type Answer = string;
+
+export type CreateFormRequestBody = {
+  body: {
+    signature: string;
+  };
+};
+
+export type CreateFormRequest = {
+  body: CreateFormRequestBody;
+} & Request;
+
+export type FormSubmission = {
+  formId: string;
+  answers: Answer[];
+  submissionId: string;
+  proof: string;
+};
+
+export type SubmitAnswerRequestBody = {
+  body: FormSubmission;
 };
