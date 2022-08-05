@@ -1,11 +1,3 @@
-type Config = {
-  APP_ID: string;
-  APP_VERSION: string;
-};
-
-const config: Config = {
-  APP_ID: "StoryForm-dev",
-  APP_VERSION: "0.0.1"
-};
-
-export default config;
+export const APP_ID = "StoryForm-dev";
+export const APP_VERSION = "0.0.1";
+export const STORY_FORM_CONTRACT = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";

@@ -1,14 +1,23 @@
 import arweave, { getWalletKey } from "./arweave";
 import sha256 from "crypto-js/sha256";
-import config from "../config";
-const { APP_ID, APP_VERSION } = config;
-import { EIP721TypedMessage, FormInput, Answer, FormSubmission } from "types";
+import { APP_ID, APP_VERSION } from "../config";
+import {
+  EIP721TypedMessage,
+  FormInput,
+  Answer,
+  FormSubmissionInput
+} from "types";
+import { packToSolidityProof } from "@semaphore-protocol/proof";
+import { ethers } from "ethers";
+import { STORY_FORM_CONTRACT } from "../config";
+import { wallet, provider } from "./ethereum";
 
 import {
   MessageTypes,
   recoverTypedSignature,
   SignTypedDataVersion
 } from "@metamask/eth-sig-util";
+import StoryFormABI from "../../abi/StoryForm.json";
 
 const isSignatureValid = (
   message: EIP721TypedMessage,
@@ -36,13 +45,15 @@ const isSignatureValid = (
  * Verify the signature and create an Arweave tx to upload the form
  */
 export const uploadForm = async (formInput: FormInput): Promise<string> => {
-  const { signature, eip721TypedMessage } = formInput;
-  const form = eip721TypedMessage.message;
+  const { signature, eip712TypedMessage } = formInput;
+  const form = eip712TypedMessage.value;
   const formId = sha256(form.owner + Date.now());
 
+  /*
   if (!isSignatureValid(eip721TypedMessage, signature, form.owner)) {
     throw new Error("Invalid signature");
   }
+  */
 
   const key = await getWalletKey();
 
@@ -69,18 +80,19 @@ export const uploadForm = async (formInput: FormInput): Promise<string> => {
 };
 
 export const uploadAnswer = async (
-  formSubmission: FormSubmission
-): Promise<string> => {
-  // TODO: Verify the proof here
-
+  formSubmission: FormSubmissionInput
+): Promise<{
+  arweaveTxId: string;
+  verificationTxId: string;
+}> => {
   const key = await getWalletKey();
-
   const transaction = await arweave.createTransaction(
     {
       data: JSON.stringify(
         {
           answers: formSubmission.answers,
-          proof: formSubmission.proof
+          membershipProof: formSubmission.membershipProof,
+          dataSubmissionProof: formSubmission.dataSubmissionProof
         },
         null,
         0
@@ -99,7 +111,39 @@ export const uploadAnswer = async (
   await arweave.transactions.sign(transaction, key);
   await arweave.transactions.post(transaction);
 
-  console.log(transaction.id);
+  const dataSubmissionProof = JSON.parse(formSubmission.dataSubmissionProof);
+  const membershipProof = JSON.parse(formSubmission.membershipProof);
 
-  return transaction.id;
+  const solidityDataSubmissionProof = packToSolidityProof(
+    dataSubmissionProof.proof
+  );
+
+  const solidityMembershipProof = packToSolidityProof(membershipProof.proof);
+
+  const storyForm = new ethers.Contract(
+    STORY_FORM_CONTRACT,
+    StoryFormABI.abi,
+    provider
+  );
+
+  let contractWithSigner = storyForm.connect(wallet);
+
+  const verificationTx = await contractWithSigner.veirfyProof(
+    dataSubmissionProof.publicSignals[0],
+    membershipProof.publicSignals.externalNullifier,
+    dataSubmissionProof.publicSignals[1],
+    membershipProof.publicSignals.nullifierHash,
+    solidityMembershipProof,
+    solidityDataSubmissionProof,
+    {
+      gasLimit: 1000000
+    }
+  );
+
+  await verificationTx.wait();
+
+  return {
+    arweaveTxId: transaction.id,
+    verificationTxId: verificationTx.txId
+  };
 };

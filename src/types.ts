@@ -41,7 +41,23 @@ export type EIP721TypedMessage = {
 
 export type FormInput = {
   signature: string;
-  eip721TypedMessage: EIP721TypedMessage;
+  eip712TypedMessage: {
+    domain: {
+      [additionalProperties: string]: string;
+    };
+    types: {
+      [additionalProperties: string]: {
+        name: string;
+        type: string;
+      }[];
+    };
+    value: {
+      title: string;
+      version: number;
+      questions: string;
+      owner: string;
+    };
+  };
 };
 
 // Submission/Answer
@@ -58,13 +74,14 @@ export type CreateFormRequest = {
   body: CreateFormRequestBody;
 } & Request;
 
-export type FormSubmission = {
+export type FormSubmissionInput = {
   formId: string;
   answers: Answer[];
   submissionId: string;
-  proof: string;
+  dataSubmissionProof: string;
+  membershipProof: string;
 };
 
 export type SubmitAnswerRequestBody = {
-  body: FormSubmission;
+  body: FormSubmissionInput;
 };
