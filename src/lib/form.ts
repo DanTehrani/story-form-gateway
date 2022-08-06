@@ -50,7 +50,7 @@ export const uploadForm = async (formInput: FormInput): Promise<string> => {
   const formId = sha256(form.owner + Date.now());
 
   /*
-  if (!isSignatureValid(eip721TypedMessage, signature, form.owner)) {
+  if (!isSignatureValid(form, signature, form.owner)) {
     throw new Error("Invalid signature");
   }
   */
@@ -69,7 +69,7 @@ export const uploadForm = async (formInput: FormInput): Promise<string> => {
   transaction.addTag("Type", "Form");
   transaction.addTag("Form-Id", formId);
   transaction.addTag("Signature", signature); // sign(version, title, questions)
-  transaction.addTag("Version", form.version.toString());
+  transaction.addTag("Unix-Time", form.unixTime.toString());
 
   await arweave.transactions.sign(transaction, key);
   await arweave.transactions.post(transaction);
@@ -106,7 +106,7 @@ export const uploadAnswer = async (
   transaction.addTag("Type", "submission");
   transaction.addTag("Form-Id", formSubmission.formId);
   transaction.addTag("Submission-Id", formSubmission.submissionId);
-  transaction.addTag("Version", "1");
+  transaction.addTag("Unix-Time", formSubmission.unixTime.toString());
 
   await arweave.transactions.sign(transaction, key);
   await arweave.transactions.post(transaction);
@@ -128,7 +128,7 @@ export const uploadAnswer = async (
 
   let contractWithSigner = storyForm.connect(wallet);
 
-  const verificationTx = await contractWithSigner.veirfyProof(
+  const verificationTx = await contractWithSigner.verifyProof(
     dataSubmissionProof.publicSignals[0],
     membershipProof.publicSignals.externalNullifier,
     dataSubmissionProof.publicSignals[1],

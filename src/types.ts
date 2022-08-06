@@ -16,7 +16,7 @@ export type FormQuestion = {
 export type Form = {
   id: string;
   title: string;
-  version: string;
+  unitTime: number;
   questions: FormQuestion[];
   owner: string;
 };
@@ -53,7 +53,7 @@ export type FormInput = {
     };
     value: {
       title: string;
-      version: number;
+      unixTime: number;
       questions: string;
       owner: string;
     };
@@ -80,6 +80,7 @@ export type FormSubmissionInput = {
   submissionId: string;
   dataSubmissionProof: string;
   membershipProof: string;
+  unixTime: number;
 };
 
 export type SubmitAnswerRequestBody = {
