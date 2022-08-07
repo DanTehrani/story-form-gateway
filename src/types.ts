@@ -1,7 +1,5 @@
 import { Request } from "express";
 
-// Form
-
 export type FormCustomAttribute = {
   key: string;
   value: string;
@@ -60,29 +58,19 @@ export type FormInput = {
   };
 };
 
-// Submission/Answer
-
-export type Answer = string;
-
-export type CreateFormRequestBody = {
-  body: {
-    signature: string;
-  };
-};
-
 export type CreateFormRequest = {
-  body: CreateFormRequestBody;
+  body: FormInput;
 } & Request;
 
 export type FormSubmissionInput = {
   formId: string;
-  answers: Answer[];
+  answers: string[];
   submissionId: string;
   dataSubmissionProof: string;
   membershipProof: string;
   unixTime: number;
 };
 
-export type SubmitAnswerRequestBody = {
+export type SubmitAnswerRequest = {
   body: FormSubmissionInput;
-};
+} & Request;

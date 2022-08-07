@@ -1,11 +1,10 @@
 import "dotenv/config";
 import express from "express";
 import arweave, { getWalletKey } from "./lib/arweave";
-import * as bookmark from "./lib/bookmark";
 import * as form from "./lib/form";
 import axios from "axios";
 import cors from "cors";
-import { CreateFormRequest } from "./types";
+import { CreateFormRequest, SubmitAnswerRequest } from "./types";
 
 const { PORT } = process.env;
 
@@ -18,15 +17,6 @@ app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("Story gateway");
-});
-
-app.post("/users/:userId/bookmarks", async (req, res) => {
-  const { url } = req.body;
-  const { userId } = req.params;
-
-  const transactionId = await bookmark.saveUrl(userId, url);
-
-  res.send(transactionId);
 });
 
 app.get("/cross-origin", async (req, res) => {
@@ -55,7 +45,7 @@ app.post("/forms", async (req: CreateFormRequest, res, next) => {
   }
 });
 
-app.post("/answers", async (req: CreateFormRequest, res, next) => {
+app.post("/answers", async (req: SubmitAnswerRequest, res, next) => {
   try {
     const txId = await form.uploadAnswer(req.body);
     res.send(txId);

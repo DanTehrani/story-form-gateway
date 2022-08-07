@@ -1,23 +1,15 @@
 import arweave, { getWalletKey } from "./arweave";
 import sha256 from "crypto-js/sha256";
 import { APP_ID, APP_VERSION } from "../config";
-import {
-  EIP721TypedMessage,
-  FormInput,
-  Answer,
-  FormSubmissionInput
-} from "types";
+import { EIP721TypedMessage, FormInput, FormSubmissionInput } from "types";
 import { packToSolidityProof } from "@semaphore-protocol/proof";
-import { ethers } from "ethers";
-import { STORY_FORM_CONTRACT } from "../config";
-import { wallet, provider } from "./ethereum";
 
 import {
   MessageTypes,
   recoverTypedSignature,
   SignTypedDataVersion
 } from "@metamask/eth-sig-util";
-import StoryFormABI from "../../abi/StoryForm.json";
+import storyForm from "../lib/story-form";
 
 const isSignatureValid = (
   message: EIP721TypedMessage,
@@ -85,6 +77,9 @@ export const uploadAnswer = async (
   arweaveTxId: string;
   verificationTxId: string;
 }> => {
+  // addMember
+  // Wait for the transaction to complete
+
   const key = await getWalletKey();
   const transaction = await arweave.createTransaction(
     {
@@ -120,15 +115,7 @@ export const uploadAnswer = async (
 
   const solidityMembershipProof = packToSolidityProof(membershipProof.proof);
 
-  const storyForm = new ethers.Contract(
-    STORY_FORM_CONTRACT,
-    StoryFormABI.abi,
-    provider
-  );
-
-  let contractWithSigner = storyForm.connect(wallet);
-
-  const verificationTx = await contractWithSigner.verifyProof(
+  const verificationTx = await storyForm.verifyProof(
     dataSubmissionProof.publicSignals[0],
     membershipProof.publicSignals.externalNullifier,
     dataSubmissionProof.publicSignals[1],
@@ -139,8 +126,6 @@ export const uploadAnswer = async (
       gasLimit: 1000000
     }
   );
-
-  await verificationTx.wait();
 
   return {
     arweaveTxId: transaction.id,
