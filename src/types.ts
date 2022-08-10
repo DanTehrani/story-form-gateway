@@ -19,10 +19,28 @@ export type Form = {
   owner: string;
 };
 
-export type EIP721TypedMessage = {
+export type EIP712TypedMessageValues = {
+  title: string;
+  unixTime: number;
+  questions: string;
+  owner: string;
+};
+
+export type WagmiEIP712TypedMessage = {
   domain: {
     [additionalProperties: string]: string;
   };
+  types: {
+    [additionalProperties: string]: {
+      name: string;
+      type: string;
+    }[];
+  };
+  value: EIP712TypedMessageValues;
+  primaryType: string;
+};
+
+export type EIP712TypedMessage = {
   types: {
     EIP712Domain: {
       name: string;
@@ -33,29 +51,12 @@ export type EIP721TypedMessage = {
       type: string;
     }[];
   };
-  primaryType: string;
-  message: Form;
-};
+  message: EIP712TypedMessageValues;
+} & WagmiEIP712TypedMessage;
 
 export type FormInput = {
   signature: string;
-  eip712TypedMessage: {
-    domain: {
-      [additionalProperties: string]: string;
-    };
-    types: {
-      [additionalProperties: string]: {
-        name: string;
-        type: string;
-      }[];
-    };
-    value: {
-      title: string;
-      unixTime: number;
-      questions: string;
-      owner: string;
-    };
-  };
+  eip712TypedMessage: WagmiEIP712TypedMessage;
 };
 
 export type CreateFormRequest = {

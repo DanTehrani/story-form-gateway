@@ -1,7 +1,12 @@
 import arweave, { getWalletKey } from "./arweave";
 import sha256 from "crypto-js/sha256";
 import { APP_ID, APP_VERSION } from "../config";
-import { EIP721TypedMessage, FormInput, FormSubmissionInput } from "types";
+import {
+  WagmiEIP712TypedMessage,
+  EIP712TypedMessage,
+  FormInput,
+  FormSubmissionInput
+} from "types";
 import { packToSolidityProof } from "@semaphore-protocol/proof";
 
 import {
@@ -12,16 +17,30 @@ import {
 import storyForm from "../lib/story-form";
 
 const isSignatureValid = (
-  message: EIP721TypedMessage,
+  message: WagmiEIP712TypedMessage,
   signature: string,
   address: string
 ): boolean => {
   try {
+    const data: EIP712TypedMessage = {
+      ...message,
+      types: {
+        ...message.types,
+        EIP712Domain: [
+          { name: "name", type: "string" },
+          { name: "version", type: "string" },
+          { name: "chainId", type: "uint256" },
+          { name: "verifyingContract", type: "address" }
+        ]
+      },
+      message: message.value
+    };
+
     const recoveredAddr = recoverTypedSignature<
       SignTypedDataVersion.V4,
       MessageTypes
     >({
-      data: message,
+      data,
       signature,
       version: SignTypedDataVersion.V4
     });
@@ -41,11 +60,9 @@ export const uploadForm = async (formInput: FormInput): Promise<string> => {
   const form = eip712TypedMessage.value;
   const formId = sha256(form.owner + Date.now());
 
-  /*
-  if (!isSignatureValid(form, signature, form.owner)) {
+  if (!isSignatureValid(eip712TypedMessage, signature, form.owner)) {
     throw new Error("Invalid signature");
   }
-  */
 
   const key = await getWalletKey();
 
@@ -108,7 +125,7 @@ export const uploadAnswer = async (
 
   const dataSubmissionProof = JSON.parse(formSubmission.dataSubmissionProof);
   const membershipProof = JSON.parse(formSubmission.membershipProof);
-
+  debugger;
   const solidityDataSubmissionProof = packToSolidityProof(
     dataSubmissionProof.proof
   );
