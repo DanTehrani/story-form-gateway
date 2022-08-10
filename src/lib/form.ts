@@ -115,7 +115,7 @@ export const uploadAnswer = async (
 
   transaction.addTag("App-Id", APP_ID);
   transaction.addTag("App-Version", APP_VERSION);
-  transaction.addTag("Type", "submission");
+  transaction.addTag("Type", "Submission");
   transaction.addTag("Form-Id", formSubmission.formId);
   transaction.addTag("Submission-Id", formSubmission.submissionId);
   transaction.addTag("Unix-Time", formSubmission.unixTime.toString());
