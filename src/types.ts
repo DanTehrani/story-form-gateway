@@ -11,19 +11,32 @@ export type FormQuestion = {
   customerAttributes: FormCustomAttribute[];
 };
 
+export type FormSettings = {
+  respondentCriteria: string;
+  encryptAnswers: boolean;
+  encryptionPubKey?: string;
+  erc721TokenAddress?: string;
+};
+
 export type Form = {
   id: string;
   title: string;
+  description: string;
   unitTime: number;
   questions: FormQuestion[];
+  settings: FormSettings;
   owner: string;
 };
 
-export type EIP712TypedMessageValues = {
+export type FormUploadInput = {
+  id: string;
   title: string;
   unixTime: number;
-  questions: string;
+  questions: FormQuestion[];
+  settings: FormSettings;
   owner: string;
+  status: string;
+  appId: string;
 };
 
 export type WagmiEIP712TypedMessage = {
@@ -36,7 +49,7 @@ export type WagmiEIP712TypedMessage = {
       type: string;
     }[];
   };
-  value: EIP712TypedMessageValues;
+  value: FormUploadInput;
   primaryType: string;
 };
 
@@ -51,7 +64,7 @@ export type EIP712TypedMessage = {
       type: string;
     }[];
   };
-  message: EIP712TypedMessageValues;
+  message: FormUploadInput;
 } & WagmiEIP712TypedMessage;
 
 export type FormInput = {
@@ -70,6 +83,7 @@ export type FormSubmissionInput = {
   dataSubmissionProof: string;
   membershipProof: string;
   unixTime: number;
+  appId: string;
 };
 
 export type SubmitAnswerRequest = {
