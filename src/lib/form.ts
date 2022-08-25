@@ -65,6 +65,8 @@ export const uploadForm = async (formInput: FormInput): Promise<string> => {
     throw new Error("Invalid signature");
   }
 
+  // TODO Don't allow uploading in dev environment
+
   const key = await getWalletKey();
 
   const transaction = await arweave.createTransaction(
