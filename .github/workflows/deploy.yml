@@ -12,6 +12,10 @@ jobs:
       id-token: write
       contents: read
     steps:
+      - name: Checkout ${{ github.ref_name }}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref_name }}
       - id: "auth"
         uses: "google-github-actions/auth@v0"
         with:
@@ -22,5 +26,6 @@ jobs:
         with:
           service: "story-gateway"
           source: ./
+          region: asia-northeast1
       - name: "output"
         run: 'curl "${{ steps.deploy.outputs.url }}"'
