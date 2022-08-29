@@ -16,6 +16,7 @@ import {
   SignTypedDataVersion
 } from "@metamask/eth-sig-util";
 import storyForm from "../lib/story-form";
+import { getBundlr } from "./bundlr";
 
 const isSignatureValid = (
   message: WagmiEIP712TypedMessage,
@@ -58,6 +59,7 @@ const isSignatureValid = (
  */
 export const uploadForm = async (formInput: FormInput): Promise<string> => {
   const { signature, eip712TypedMessage } = formInput;
+
   const form = eip712TypedMessage.value;
   const formId = form.id;
 
@@ -65,28 +67,47 @@ export const uploadForm = async (formInput: FormInput): Promise<string> => {
     throw new Error("Invalid signature");
   }
 
-  // TODO Don't allow uploading in dev environment
-
-  const key = await getWalletKey();
-
-  const transaction = await arweave.createTransaction(
+  const tags = [
     {
-      data: JSON.stringify(form, null, 0)
+      name: "App-Id",
+      value: form.appId
     },
-    key
+    {
+      name: "Type",
+      value: "Form"
+    },
+    {
+      name: "Form-Id",
+      value: formId
+    },
+    {
+      name: "Owner",
+      value: form.owner
+    },
+    {
+      name: "Status",
+      value: form.status
+    },
+    {
+      name: "Signature",
+      value: signature
+    },
+    {
+      name: "Unix-Time",
+      value: form.unixTime.toString()
+    }
+  ];
+
+  const bundlr = await getBundlr();
+  const transaction = await bundlr.createTransaction(
+    JSON.stringify(form, null, 0),
+    {
+      tags
+    }
   );
 
-  transaction.addTag("App-Id", form.appId);
-  transaction.addTag("Type", "Form");
-  transaction.addTag("Form-Id", formId);
-  transaction.addTag("Owner", form.owner);
-  transaction.addTag("Status", form.status);
-  transaction.addTag("Signature", signature);
-  transaction.addTag("Unix-Time", form.unixTime.toString());
-
-  await arweave.transactions.sign(transaction, key);
-  await arweave.transactions.post(transaction);
-
+  await transaction.sign();
+  await transaction.upload();
   console.log(transaction.id);
 
   return transaction.id;
@@ -131,32 +152,52 @@ export const uploadAnswer = async (
   );
   */
 
-  const key = await getWalletKey();
-  const transaction = await arweave.createTransaction(
+  const data = JSON.stringify(
     {
-      data: JSON.stringify(
-        {
-          answers: formSubmission.answers,
-          membershipProof: formSubmission.membershipProof,
-          dataSubmissionProof: formSubmission.dataSubmissionProof
-        },
-        null,
-        0
-      )
+      answers: formSubmission.answers,
+      membershipProof: formSubmission.membershipProof,
+      dataSubmissionProof: formSubmission.dataSubmissionProof
     },
-    key
+    null,
+    0
   );
 
-  transaction.addTag("App-Id", formSubmission.appId);
-  transaction.addTag("Type", "Submission");
-  transaction.addTag("Form-Id", formSubmission.formId);
-  if (formSubmission.submissionId) {
-    transaction.addTag("Submission-Id", formSubmission.submissionId);
-  }
-  transaction.addTag("Unix-Time", formSubmission.unixTime.toString());
+  const tags = [
+    {
+      name: "App-Id",
+      value: formSubmission.appId
+    },
+    {
+      name: "Type",
+      value: "Submission"
+    },
+    {
+      name: "Form-Id",
+      value: formSubmission.formId
+    },
 
-  await arweave.transactions.sign(transaction, key);
-  await arweave.transactions.post(transaction);
+    {
+      name: "Unix-Time",
+      value: formSubmission.unixTime.toString()
+    }
+  ];
+
+  if (formSubmission.submissionId) {
+    tags.push({
+      name: "Submission-Id",
+      value: formSubmission.submissionId
+    });
+  }
+  const bundlr = await getBundlr();
+  const transaction = await bundlr.createTransaction(data, {
+    tags
+  });
+
+  await transaction.sign();
+  await transaction.upload();
+  console.log(transaction.id);
+
+  //  await arweave.transactions.post(transaction);
 
   if (formSubmission.dataSubmissionProof) {
     const dataSubmissionProof = JSON.parse(formSubmission.dataSubmissionProof);
