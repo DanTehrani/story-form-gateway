@@ -35,5 +35,3 @@ jobs:
           source: ./
           region: asia-northeast1
           project_id: story-4a1ac
-      - name: "output"
-        run: 'curl "${{ steps.deploy.outputs.url }}"'
