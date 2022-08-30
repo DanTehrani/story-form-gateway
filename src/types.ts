@@ -12,10 +12,7 @@ export type FormQuestion = {
 };
 
 export type FormSettings = {
-  respondentCriteria: string;
-  encryptAnswers: boolean;
-  encryptionPubKey?: string;
-  erc721TokenAddress?: string;
+  // TBD
 };
 
 export type Form = {
