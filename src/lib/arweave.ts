@@ -4,7 +4,7 @@ import * as fs from "fs";
 
 // Used in story-gateway
 import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
-const { ARWEAVE_WALLET_KEY_FILE, PROJECT_NUMBER } = process.env;
+const { WALLET_KEY_FILE, PROJECT_NUMBER } = process.env;
 
 const arweave = Arweave.init({
   host: "arweave.net",
@@ -23,10 +23,10 @@ const loadKey = async () => {
       })
     )[0].payload.data.toString();
   } else {
-    if (ARWEAVE_WALLET_KEY_FILE) {
-      keyRaw = fs.readFileSync(ARWEAVE_WALLET_KEY_FILE, "utf-8");
+    if (WALLET_KEY_FILE) {
+      keyRaw = fs.readFileSync(WALLET_KEY_FILE, "utf-8");
     } else {
-      console.error("ARWEAVE_WALLET_KEY_FILE is not set!");
+      console.error("WALLET_KEY_FILE is not set!");
     }
   }
 
