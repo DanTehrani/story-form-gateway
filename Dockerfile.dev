@@ -1,8 +1,0 @@
-FROM node:16
-
-WORKDIR /root
-
-COPY ./package.json ./
-COPY ./yarn.lock ./
-
-RUN yarn

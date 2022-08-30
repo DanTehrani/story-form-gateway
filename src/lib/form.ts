@@ -1,21 +1,15 @@
-import arweave, { getWalletKey } from "./arweave";
-import sha256 from "crypto-js/sha256";
 import {
   WagmiEIP712TypedMessage,
   EIP712TypedMessage,
   FormInput,
   FormSubmissionInput
 } from "types";
-import { packToSolidityProof } from "@semaphore-protocol/proof";
-import { IncrementalMerkleTree } from "@zk-kit/incremental-merkle-tree";
-import { poseidon } from "circomlibjs"; // v0.0.8
 
 import {
   MessageTypes,
   recoverTypedSignature,
   SignTypedDataVersion
 } from "@metamask/eth-sig-util";
-import storyForm from "../lib/story-form";
 import { getBundlr } from "./bundlr";
 
 const isSignatureValid = (
@@ -119,39 +113,6 @@ export const uploadAnswer = async (
   arweaveTxId: string;
   verificationTxId?: string;
 }> => {
-  // If the form is a gated form:
-  /*
-  const groupId = 0; // Get group id of form from Arweave
-  const address = ""; // Get address from the signature
-
-  const events = await storyForm.queryFilter(
-    storyForm.filters.MemberAdded(groupId, null, null)
-  );
-
-  const members = events.map(({ args }) => args[1].toString());
-  const tree = new IncrementalMerkleTree(poseidon, 16, BigInt(0), 2); // Binary tree.
-
-  members.forEach(member => {
-    tree.insert(member);
-  });
-
-  const hash = sha256("some message");
-
-  const { leaf, pathIndices, siblings } = tree.createProof(1);
-
-  // addMember
-  // Wait for the transaction to complete
-
-  await storyForm.verifyMerkleProof(
-    groupId,
-    leaf,
-    siblings,
-    pathIndices,
-    hash,
-    signature
-  );
-  */
-
   const data = JSON.stringify(
     {
       answers: formSubmission.answers,
@@ -195,37 +156,7 @@ export const uploadAnswer = async (
 
   await transaction.sign();
   await transaction.upload();
-  console.log(transaction.id);
 
-  //  await arweave.transactions.post(transaction);
-
-  if (formSubmission.dataSubmissionProof) {
-    const dataSubmissionProof = JSON.parse(formSubmission.dataSubmissionProof);
-    const membershipProof = JSON.parse(formSubmission.membershipProof);
-    debugger;
-    const solidityDataSubmissionProof = packToSolidityProof(
-      dataSubmissionProof.proof
-    );
-
-    const solidityMembershipProof = packToSolidityProof(membershipProof.proof);
-
-    const verificationTx = await storyForm.verifyProof(
-      dataSubmissionProof.publicSignals[0],
-      membershipProof.publicSignals.externalNullifier,
-      dataSubmissionProof.publicSignals[1],
-      membershipProof.publicSignals.nullifierHash,
-      solidityMembershipProof,
-      solidityDataSubmissionProof,
-      {
-        gasLimit: 1000000
-      }
-    );
-
-    return {
-      arweaveTxId: transaction.id,
-      verificationTxId: verificationTx.txId
-    };
-  }
   return {
     arweaveTxId: transaction.id
   };
