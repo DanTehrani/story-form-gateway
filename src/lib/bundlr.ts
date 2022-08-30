@@ -1,18 +1,11 @@
 import Bundlr from "@bundlr-network/client";
 import { getWalletKey } from "./arweave";
 
-const { NODE_ENV } = process.env;
-
-const PAYMENT_CURRENCY = process.env.PAYMENT_CURRENCY;
+const { BUNDLR_NODE, PAYMENT_CURRENCY } = process.env;
 
 if (!PAYMENT_CURRENCY) {
   console.error("Payment currency is not set!");
 }
-
-const BUNDLR_NODE =
-  NODE_ENV === "development"
-    ? "https://devnet.bundlr.network"
-    : "https://node1.bundlr.network";
 
 let bundlr;
 export const getBundlr = async () => {
