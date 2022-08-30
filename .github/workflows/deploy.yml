@@ -21,7 +21,14 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_GITHUB_ACTIONS_SERVICE_ACCOUNT }}
-      - id: "deploy"
+      - id: "deploy-dev"
+        uses: "google-github-actions/deploy-cloudrun@v0"
+        with:
+          service: "dev-story-gateway"
+          source: ./
+          region: asia-northeast1
+          project_id: story-4a1ac
+      - id: "deploy-prod"
         uses: "google-github-actions/deploy-cloudrun@v0"
         with:
           service: "story-gateway"
