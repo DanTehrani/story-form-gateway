@@ -12,7 +12,7 @@ if (!PAYMENT_CURRENCY) {
 const BUNDLR_NODE =
   NODE_ENV === "development"
     ? "https://devnet.bundlr.network"
-    : "http://node1.bundlr.network";
+    : "https://node1.bundlr.network";
 
 let bundlr;
 export const getBundlr = async () => {
