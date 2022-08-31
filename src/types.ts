@@ -1,14 +1,8 @@
 import { Request } from "express";
 
-export type FormCustomAttribute = {
-  key: string;
-  value: string;
-};
-
 export type FormQuestion = {
   label: string;
   type: string;
-  customerAttributes: FormCustomAttribute[];
 };
 
 export type FormSettings = {
