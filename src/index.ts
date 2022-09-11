@@ -17,6 +17,9 @@ app.get("/", (req, res) => {
   res.send("Story gateway");
 });
 
+/**
+ * Create a form
+ */
 app.post("/forms", async (req: CreateFormRequest, res, next) => {
   try {
     const txId = await form.uploadForm(req.body);
@@ -26,6 +29,9 @@ app.post("/forms", async (req: CreateFormRequest, res, next) => {
   }
 });
 
+/**
+ * Submit an answer
+ */
 app.post("/answers", async (req: SubmitAnswerRequest, res, next) => {
   try {
     const txId = await form.uploadAnswer(req.body);
