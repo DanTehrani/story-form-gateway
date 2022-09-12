@@ -1,25 +1,30 @@
 import Bundlr from "@bundlr-network/client";
-import getArweaveWalletKey from "./wallets/arweave-wallet";
-import ethereumWalletPrivKey from "./wallets/ethereum-wallet";
+import { getWalletKey } from "./ethereum-wallet";
 
-const { BUNDLR_NODE, PAYMENT_CURRENCY } = process.env;
+const { BUNDLR_NODE, BUNDLR_PROVIDER_URL } = process.env;
 
-if (!PAYMENT_CURRENCY) {
-  console.error("Payment currency is not set!");
+if (BUNDLR_NODE) {
+  console.log("Using  Bundlr node:", BUNDLR_NODE);
 }
 
 let bundlr;
 export const getBundlr = async () => {
-  let key: string | Uint8Array;
   if (!bundlr) {
-    switch (PAYMENT_CURRENCY) {
-      case "ethereum":
-        key = ethereumWalletPrivKey;
-      case "arweave":
-        key = await getArweaveWalletKey();
-    }
+    const key = await getWalletKey();
 
-    bundlr = new Bundlr(BUNDLR_NODE, PAYMENT_CURRENCY, key);
+    bundlr = new Bundlr(BUNDLR_NODE, "ethereum", key, {
+      providerUrl: BUNDLR_PROVIDER_URL
+    });
+
+    const accountBalance = await bundlr.getLoadedBalance();
+    console.log("Pay Bundlr node with address:", bundlr.address);
+    console.log(
+      "Account balance:",
+      bundlr.utils.unitConverter(accountBalance, "wei", "ether").toNumber(),
+      "ETH"
+    );
+
+    bundlr.getBalance;
   }
 
   return bundlr;
