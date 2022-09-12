@@ -4,9 +4,6 @@ import * as fs from "fs";
 import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 const { ARWEAVE_WALLET_KEY_FILE, PROJECT_NUMBER } = process.env;
 
-const fromHexString = hexString =>
-  Uint8Array.from(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-
 let key;
 const loadKey = async () => {
   let keyRaw: string;
