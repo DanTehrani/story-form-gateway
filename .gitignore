@@ -10,3 +10,4 @@ arweave-wallet.json
 
 # Used to fund Bundlr node
 eth-wallet.json 
+0x*.json
