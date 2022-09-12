@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  deploy-to-dev:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -21,14 +21,29 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_GITHUB_ACTIONS_SERVICE_ACCOUNT }}
-      - id: "deploy-dev"
+      - id: "deploy"
         uses: "google-github-actions/deploy-cloudrun@v0"
         with:
           service: "dev-story-gateway"
           source: ./
           region: asia-northeast1
           project_id: story-4a1ac
-      - id: "deploy-prod"
+  deploy-to-prod:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout ${{ github.ref_name }}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref_name }}
+      - id: "auth"
+        uses: "google-github-actions/auth@v0"
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_GITHUB_ACTIONS_SERVICE_ACCOUNT }}
+      - id: "deploy"
         uses: "google-github-actions/deploy-cloudrun@v0"
         with:
           service: "story-gateway"
