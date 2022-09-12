@@ -13,7 +13,9 @@ const loadKey = async () => {
       await client.accessSecretVersion({
         name: `projects/${PROJECT_NUMBER}/secrets/ethereum-wallet-1/versions/latest`
       })
-    )[0].payload.data.toString();
+    )[0].payload.data
+      .toString()
+      .replace("0x", "");
   } else {
     key =
       ETHEREUM_WALLET_PRIVATE_KEY &&
