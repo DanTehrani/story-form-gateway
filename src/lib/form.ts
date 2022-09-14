@@ -12,6 +12,11 @@ import {
 } from "@metamask/eth-sig-util";
 import { getBundlr } from "./bundlr";
 
+const ALPHA_WHITE_LIST = [
+  "0x400EA6522867456E988235675b9Cb5b1Cf5b79C8",
+  "0x06D35f6B8Fb9Ad47A866052b6a6C3c2DcD1C36F1"
+].map((addr: string) => addr.toUpperCase());
+
 const isSignatureValid = (
   message: WagmiEIP712TypedMessage,
   signature: string,
@@ -40,6 +45,10 @@ const isSignatureValid = (
       signature,
       version: SignTypedDataVersion.V4
     });
+
+    if (!ALPHA_WHITE_LIST.includes(recoveredAddr.toUpperCase())) {
+      return false;
+    }
 
     return recoveredAddr.toUpperCase() === address.toUpperCase();
   } catch (err) {
