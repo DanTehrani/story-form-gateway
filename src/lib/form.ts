@@ -14,7 +14,8 @@ import { getBundlr } from "./bundlr";
 
 const ALPHA_WHITE_LIST = [
   "0x400EA6522867456E988235675b9Cb5b1Cf5b79C8",
-  "0x06D35f6B8Fb9Ad47A866052b6a6C3c2DcD1C36F1"
+  "0x06D35f6B8Fb9Ad47A866052b6a6C3c2DcD1C36F1",
+  "0xBF44E0F486f17662F2C3dBA45D70DDf02875731E"
 ].map((addr: string) => addr.toUpperCase());
 
 const isSignatureValid = (
